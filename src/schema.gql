@@ -26,9 +26,11 @@ type Mutation {
 
 input CreateItemInput {
   title: String!
+  upload: String!
 }
 
 input UpdateItemInput {
   title: String
+  upload: String
   id: Int!
 }
