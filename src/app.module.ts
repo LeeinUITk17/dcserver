@@ -7,6 +7,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ItemModule } from './item/item.module';
 // import { ProxyMiddleware } from 'proxy.middleware';
+import { PassportModule } from '@nestjs/passport';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { ItemModule } from './item/item.module';
       introspection: true,
     }),
     ItemModule,
+    UserModule,
+    AuthModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   providers: [AppService],
 })
