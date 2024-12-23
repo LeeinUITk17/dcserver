@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
+@UseGuards(AuthGuard('jwt'))
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -17,8 +18,15 @@ export class AuthController {
     return this.authService.login(body);
   }
   @Get('profile')
-@UseGuards(AuthGuard('jwt'))
 async getProfile(@Req() req) {
   return req.user;  
 }
+ @Post('refresh')
+  async refresh(@Body() body: { refreshToken: string }) {
+    return this.authService.refreshToken(body.refreshToken);
+  }
+  @Post('logout')
+  async logout(@Body() body: { refreshToken: string }) {
+    return this.authService.logout(body.refreshToken);
+  }
 }

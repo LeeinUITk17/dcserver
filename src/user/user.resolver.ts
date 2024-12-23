@@ -1,35 +1,41 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { User } from './entities/user.entity';
-import { CreateUserInput } from './dto/create-user.input';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/auth.gaurd';
+import { AdminGuard } from 'src/auth/admin.gaurd';
 import { UpdateUserInput } from './dto/update-user.input';
-
-@Resolver(() => User)
+import { User } from './entities/user.entity';
+@Resolver('User')
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Mutation(() => User)
-  createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
-    return this.userService.create(createUserInput);
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Query(() => [User], { name: 'getAllUsers' })
+  async getAllUsers() {
+    return this.userService.getAllUsers();
   }
 
-  @Query(() => [User], { name: 'user' })
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @Query(() => User, { name: 'getUserById' })
+  async getUserById(@Args('id') id: string) {
+    return this.userService.getUserById(id);
   }
 
-  @Query(() => User, { name: 'user' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.userService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => User, { name: 'updateUserInfo' })
+  async updateUserInfo(
+    @Args('id') id: string,
+    @Args('updateData') updateData: UpdateUserInput,
+    @Context('req') context: any,
+  ) {
+    const requestUser = context.user;
+    return this.userService.updateUserInfo(id, updateData, requestUser);
   }
 
-  @Mutation(() => User)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.userService.update(updateUserInput.id, updateUserInput);
-  }
-
-  @Mutation(() => User)
-  removeUser(@Args('id', { type: () => Int }) id: number) {
-    return this.userService.remove(id);
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Query(() => Boolean, { name: 'checkAdminPermission' })
+  async checkAdminPermission(@Context('req') context: any) {
+    const requestUser = context.user;
+    return this.userService.rulePermission(requestUser.id);
   }
 }

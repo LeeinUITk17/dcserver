@@ -21,16 +21,16 @@ type User {
 type Query {
   items: [Item!]!
   item(id: Int!): Item!
-  user(id: Int!): User!
+  getAllUsers: [User!]!
+  getUserById(id: String!): User!
+  checkAdminPermission: Boolean!
 }
 
 type Mutation {
   createItem(data: CreateItemInput!): Item!
   updateItem(data: UpdateItemInput!): Item!
   deleteItem(id: Int!): Item!
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  removeUser(id: Int!): User!
+  updateUserInfo(id: String!, updateData: UpdateUserInput!): User!
 }
 
 input CreateItemInput {
@@ -44,13 +44,11 @@ input UpdateItemInput {
   id: Int!
 }
 
-input CreateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
 input UpdateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  name: String
+  email: String
+  password: String
+  phoneNumber: String
+  address: String
+  isAdmin: Boolean
 }

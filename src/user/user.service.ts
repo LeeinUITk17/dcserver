@@ -1,26 +1,90 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  create(createUserInput: CreateUserInput) {
-    return 'This action adds a new user';
+  constructor(private readonly prisma: PrismaService) {}
+  async getAllUsers() {
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        address: true,
+        isAdmin: true,
+        createdAt: true,
+        updatedAt: true,
+        userTier: true,
+      },
+    });
+  }
+  async getUserById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        address: true,
+        isAdmin: true,
+        createdAt: true,
+        updatedAt: true,
+        userTier: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    return user;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async updateUserInfo(
+    userId: string,
+    updateData: Partial<{ name: string; phoneNumber: string; address: string }>,
+    requestUser: any,
+  ) {
+    if (requestUser.id !== userId && !requestUser.isAdmin) {
+      throw new ForbiddenException(
+        'You do not have permission to update this user',
+      );
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...updateData,
+        updatedAt: new Date(),
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  async rulePermission(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isAdmin: true },
+    });
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
-  }
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    if (!user.isAdmin) {
+      throw new ForbiddenException(
+        'You do not have permission for this action',
+      );
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    return true;
   }
 }
