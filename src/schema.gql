@@ -2,46 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Item {
-  id: Int!
-  title: String!
-  createdAt: DateTime!
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 type User {
   """Example field (placeholder)"""
   exampleField: Int!
 }
 
 type Query {
-  items: [Item!]!
-  item(id: Int!): Item!
   getAllUsers: [User!]!
   getUserById(id: String!): User!
   checkAdminPermission: Boolean!
 }
 
 type Mutation {
-  createItem(data: CreateItemInput!): Item!
-  updateItem(data: UpdateItemInput!): Item!
-  deleteItem(id: Int!): Item!
   updateUserInfo(id: String!, updateData: UpdateUserInput!): User!
-}
-
-input CreateItemInput {
-  title: String!
-  upload: String!
-}
-
-input UpdateItemInput {
-  title: String
-  upload: String
-  id: Int!
 }
 
 input UpdateUserInput {
