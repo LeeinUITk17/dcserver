@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid())
   name      String
   email     String   @unique
   phone     String   @unique
@@ -16,83 +16,209 @@ model User {
   role      Role
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  staff     Staff?
-  orders    Order[]
-  tokens    Token[]
+  userTier  UserTier?     @default(BRONZE)
+  point     Int           @default(0)
+  employee   Employee?
+  orders     Order[]
+  tokens     Token[]
+  reservations Reservation[]
   couponTargets CouponTarget[]
+  reviews    Review[]  @relation("UserReviews")
+  couponUsages CouponUsage[]
+  isDeleted   Boolean @default(false)
 }
 
 enum Role {
-  STAFF
+  CUSTOMER
   ADMIN
+  EMPLOYEE
 }
 
-model Staff {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @unique
+model Employee {
+  id        String      @id @default(uuid())
+  userId    String      @unique
   position  String
   salary    Decimal
-  user      User    @relation(fields: [userId], references: [id])
+  hireDate  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  workSchedules WorkSchedule[]  @relation("EmployeeWorkSchedules")
+  leaveRequests LeaveRequest[]  @relation("EmployeeLeaveRequests")
+  attendances Attendance[] @relation("EmployeeAttendance")
+  overtimeRequests OvertimeRequest[]  @relation("EmployeeOvertimeRequests")
+  payrolls Payroll[]  @relation("EmployeePayrolls")
+  isDeleted   Boolean @default(false)
 }
 
-model Product {
-  id          Int      @id @default(autoincrement())
-  sku         String   @unique
-  name        String
-  categoryId  Int
-  brandId     Int
-  price       Decimal
-  stock       Int
-  minStockLevel Int    @default(5)
-  status      ProductStatus @default(ACTIVE)
-  description String?
-  imageUrl    String?
+model WorkSchedule {
+  id         String   @id @default(uuid())
+  employee   Employee @relation("EmployeeWorkSchedules", fields: [employeeId], references: [id])
+  employeeId String
+  date       DateTime
+  shiftStart DateTime
+  shiftEnd   DateTime
+  createdAt  DateTime @default(now())
+  isDeleted  Boolean  @default(false)
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveRequest {
+  id          String   @id @default(uuid())
+  employeeId  String
+  employee    Employee @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id])
+  requestDate DateTime @default(now())
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      LeaveStatus @default(PENDING)
   createdAt   DateTime @default(now())
-  category    Category @relation(fields: [categoryId], references: [id])
-  brand       Brand    @relation(fields: [brandId], references: [id])
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+}
+
+model Attendance {
+  id                    String   @id @default(uuid())
+  employee              Employee @relation("EmployeeAttendance", fields: [employeeId], references: [id])
+  employeeId            String
+  workDate              DateTime
+  checkIn               DateTime
+  checkOut              DateTime?
+  notes                 String?
+  overtimeMinutes       Int?
+  lateMinutes           Int?
+  earlyDepartureMinutes Int?
+  createdAt             DateTime @default(now())
+  isDeleted             Boolean  @default(false)
+}
+
+enum OvertimeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model OvertimeRequest {
+  id               String   @id @default(uuid())
+  employeeId       String
+  employee         Employee @relation("EmployeeOvertimeRequests", fields: [employeeId], references: [id])
+  date             DateTime
+  requestedMinutes Int
+  reason           String?
+  status           OvertimeStatus @default(PENDING)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  isDeleted        Boolean  @default(false)
+}
+
+model Payroll {
+  id          String   @id @default(uuid())
+  employeeId  String
+  employee    Employee @relation("EmployeePayrolls", fields: [employeeId], references: [id])
+  month       Int
+  year        Int
+  baseSalary  Decimal
+  standardHours Int
+  workedHours   Int
+  bonus       Decimal?
+  deductions  Decimal?
+  totalSalary Decimal
+  createdAt   DateTime @default(now())
+}
+
+model Table {
+  id        String      @id @default(uuid())
+  number    String      @unique
+  capacity  Int
+  status    TableStatus @default(AVAILABLE)
+  reservations Reservation[]
+  orders      Order[]
+  isDeleted   Boolean @default(false)
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+}
+
+model Reservation {
+  id              String      @id @default(uuid())
+  userId          String
+  tableId         String
+  reservationTime DateTime
+  status          ReservationStatus @default(PENDING)
+  
+  user            User   @relation(fields: [userId], references: [id])
+  table           Table  @relation(fields: [tableId], references: [id])
+  isDeleted   Boolean @default(false)
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model MenuCategory {
+  id   String    @id @default(uuid())
+  name String @unique
+  menuItems MenuItem[]
+  isDeleted   Boolean @default(false)
+}
+
+model MenuItem {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal
+  imageUrl    String?
+  categoryId  String
+  isAvailable Boolean  @default(true)
+  
+  category    MenuCategory @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]
-  inventories Inventory[]
-}
-
-enum ProductStatus {
-  ACTIVE
-  OUT_OF_STOCK
-  DISCONTINUED
-}
-
-model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  products Product[]
-}
-
-model Brand {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  products Product[]
+  recipeIngredients RecipeIngredient[]
+  isDeleted   Boolean @default(false)
 }
 
 model Order {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  receiverName   String
-  receiverPhone  String
-  receiverAddress String
+  id             String     @id @default(uuid())
+  userId         String
+  tableId        String?
+  orderType      OrderType
   orderDate      DateTime @default(now())
   totalAmount    Decimal
+  shippingFee    Decimal
+  taxAmount      Decimal
   status         OrderStatus @default(PENDING)
-  couponId       Int?
+  couponId       String?
+  earnedPoint    Int      @default(0)
   user           User  @relation(fields: [userId], references: [id])
+  table          Table? @relation(fields: [tableId], references: [id])
   orderItems     OrderItem[]
   delivery       Delivery?
   payment        Payment?
   coupon         Coupon? @relation(fields: [couponId], references: [id])
+  reviews        Review[]  @relation("OrderReviews")
+  isDeleted   Boolean @default(false)
+}
+
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+  DELIVERY
 }
 
 enum OrderStatus {
   PENDING
   PROCESSING
-  SHIPPED
+  SERVED
   DELIVERED
   CANCELLED
   RETURNED
@@ -100,38 +226,98 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id        Int      @id @default(autoincrement())
-  orderId   Int
-  productId Int
+  id        String      @id @default(uuid())
+  orderId   String
+  menuItemId String
   quantity  Int
   price     Decimal
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
 }
 
-model Shelf {
-  id       Int    @id @default(autoincrement())
-  name     String
-  location String
-  inventories Inventory[]
+model Review {
+  id         String       @id @default(uuid())
+  userId     String
+  orderId    String
+  rating     Int
+  comment    String?
+  createdAt  DateTime  @default(now())
+  user       User      @relation("UserReviews", fields: [userId], references: [id])
+  order      Order  @relation("OrderReviews", fields: [orderId], references: [id])
 }
 
-model Inventory {
-  id        Int @id @default(autoincrement())
-  shelfId   Int
-  productId Int
-  quantity  Int
-  shelf     Shelf   @relation(fields: [shelfId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+enum InventoryCategory {
+  MEAT
+  VEGETABLE
+  SPICE
+  DAIRY
+  BEVERAGE
+}
+
+model InventoryItem {
+  id          String       @id @default(uuid())
+  name        String
+  category    InventoryCategory
+  quantity    Int
+  unit        String
+  supplierId  String?
+  updatedAt   DateTime  @updatedAt
+  isDeleted   Boolean @default(false)
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  recipeIngredients RecipeIngredient[]
+  transactions InventoryTransaction[]
+}
+
+model RecipeIngredient {
+  id            String     @id @default(uuid())
+  menuItemId    String
+  inventoryItemId String
+  quantity      Int
+  unit          String
+
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+}
+
+model InventoryTransaction {
+  id             String      @id @default(uuid())
+  inventoryItemId String
+  transactionType TransactionType
+  quantity       Int
+  timestamp      DateTime @default(now())
+
+  inventoryItem  InventoryItem @relation(fields: [inventoryItemId], references: [id])
+}
+
+enum TransactionType {
+  IMPORT
+  EXPORT
+}
+
+model Supplier {
+  id        String     @id @default(uuid())
+  name      String
+  contact   String
+  address   String?
+  inventoryItems InventoryItem[]
+  isDeleted   Boolean @default(false)
+}
+
+model Setting {
+  id      String      @id @default(uuid())
+  key     String   @unique
+  value   String
 }
 
 model Delivery {
-  id           Int      @id @default(autoincrement())
-  orderId      Int      @unique
+  id           String      @id @default(uuid())
+  orderId      String      @unique
   deliveryDate DateTime?
   status       DeliveryStatus @default(PENDING)
   carrier      String
   trackingCode String?
+
   order        Order @relation(fields: [orderId], references: [id])
 }
 
@@ -143,13 +329,14 @@ enum DeliveryStatus {
 }
 
 model Payment {
-  id          Int      @id @default(autoincrement())
-  orderId     Int      @unique
+  id          String      @id @default(uuid())
+  orderId     String      @unique
   paymentDate DateTime @default(now())
   amount      Decimal
   method      PaymentMethod
   status      PaymentStatus @default(PENDING)
   transactionId String?
+
   order       Order @relation(fields: [orderId], references: [id])
 }
 
@@ -166,38 +353,100 @@ enum PaymentStatus {
   REFUNDED
 }
 
+model CouponPool {
+  id           String       @id @default(uuid())
+  name         String
+  description  String?
+  totalCoupons String
+  createdAt    DateTime  @default(now())
+  campaignId   String?
+  campaign     Campaign? @relation(fields: [campaignId], references: [id])
+  allocatedCount  Int       @default(0)
+  coupons      Coupon[]
+  isDeleted   Boolean @default(false)
+}
+
+enum CouponStatus {
+  AVAILABLE
+  ALLOCATED
+  EXPIRED
+  USED
+}
+
 model Coupon {
-  id              Int      @id @default(autoincrement())
-  code            String   @unique
-  discountType    String
-  discountValue   Float
-  minOrderValue   Float
-  maxDiscountValue Float
-  usageLimit      Int?
-  isActive        Boolean @default(true)
-  expiresAt       DateTime
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  orders          Order[]
-  couponTargets   CouponTarget[]
+  id                String      @id @default(uuid())
+  code              String    @unique
+  discountType      DiscountType
+  discountValue     Decimal
+  minOrderValue     Decimal
+  maxDiscountValue  Decimal
+  usageLimit        Int?      @default(1)
+  status            CouponStatus @default(AVAILABLE)
+  isActive          Boolean   @default(true)
+  expiresAt         DateTime
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  campaignId        String?
+  campaign          Campaign? @relation(fields: [campaignId], references: [id])
+  poolId            String?
+  pool              CouponPool? @relation(fields: [poolId], references: [id])
+  isDeleted   Boolean @default(false)
+  orders            Order[]
+  couponTargets     CouponTarget[]
+  couponUsages      CouponUsage[]
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model Campaign {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  coupons     Coupon[]
+  couponPools CouponPool[]
+  isDeleted   Boolean @default(false)
 }
 
 model CouponTarget {
-  id        Int      @id @default(autoincrement())
-  couponId  Int
-  userId    Int?
-  userTier  String?
+  id        String      @id @default(uuid())
+  couponId  String
+  userId    String?
+  userTier  UserTier?
   sentAt    DateTime?
   expiresAt DateTime
+  usageLimit  Int?       @default(1)
   coupon    Coupon @relation(fields: [couponId], references: [id])
   user      User?  @relation(fields: [userId], references: [id])
+  isDeleted   Boolean @default(false)
+}
+
+enum UserTier {
+  GOLD   
+  SILVER
+  BRONZE
+}
+
+model CouponUsage {
+  id        String      @id @default(uuid())
+  couponId  String
+  userId    String
+  usedAt    DateTime @default(now())
+
+  coupon    Coupon @relation(fields: [couponId], references: [id])
+  user      User   @relation(fields: [userId], references: [id])
 }
 
 model Token {
-  id           Int      @id @default(autoincrement())
-  userId       Int
+  id           String      @id @default(uuid())
+  userId       String
   refreshToken String   @unique
   expiresAt    DateTime
   createdAt    DateTime @default(now())
+  
   user         User     @relation(fields: [userId], references: [id])
 }
