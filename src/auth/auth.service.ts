@@ -10,7 +10,13 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
-  async signup(data: { name: string; email: string; password: string }) {
+
+  async signup(data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -26,11 +32,13 @@ export class AuthService {
         name: data.name,
         email: data.email,
         password: hashedPassword,
+        phone: data.phone, // Add phone field here
       },
     });
 
     return this.generateTokens(user.id);
   }
+
   async login(data: { email: string; password: string }) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
@@ -42,6 +50,7 @@ export class AuthService {
 
     return this.generateTokens(user.id);
   }
+
   async generateTokens(userId: string) {
     const accessToken = this.jwtService.sign(
       { sub: userId },
@@ -56,13 +65,13 @@ export class AuthService {
     await this.prisma.token.create({
       data: {
         refreshToken,
-        accessToken,
         userId,
         expiresAt: dayjs().add(7, 'day').toDate(),
       },
     });
     return { accessToken, refreshToken };
   }
+
   async refreshToken(refreshToken: string) {
     const token = await this.prisma.token.findUnique({
       where: { refreshToken: refreshToken },
@@ -74,6 +83,7 @@ export class AuthService {
 
     return this.generateTokens(token.userId);
   }
+
   async logout(refreshToken: string) {
     await this.prisma.token.delete({
       where: { refreshToken: refreshToken },

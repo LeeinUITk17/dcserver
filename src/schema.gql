@@ -21,7 +21,8 @@ input UpdateUserInput {
   name: String
   email: String
   password: String
-  phoneNumber: String
+  phone: String
   address: String
   isAdmin: Boolean
+  isActive: Boolean
 }

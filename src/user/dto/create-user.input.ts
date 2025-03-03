@@ -25,7 +25,7 @@ export class CreateUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  phoneNumber?: string;
+  phone?: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -36,4 +36,9 @@ export class CreateUserInput {
   @IsOptional()
   @IsBoolean()
   isAdmin?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

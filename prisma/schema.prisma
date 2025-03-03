@@ -10,12 +10,14 @@ datasource db {
 model User {
   id        String      @id @default(uuid())
   name      String
+  password  String   
   email     String   @unique
   phone     String   @unique
   address   String?
-  role      Role
+  isAdmin   Boolean  @default(false)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
   userTier  UserTier?     @default(BRONZE)
   point     Int           @default(0)
   employee   Employee?
@@ -26,12 +28,6 @@ model User {
   reviews    Review[]  @relation("UserReviews")
   couponUsages CouponUsage[]
   isDeleted   Boolean @default(false)
-}
-
-enum Role {
-  CUSTOMER
-  ADMIN
-  EMPLOYEE
 }
 
 model Employee {

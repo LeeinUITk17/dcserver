@@ -28,7 +28,7 @@ export class UpdateUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  phoneNumber?: string;
+  phone?: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -39,4 +39,9 @@ export class UpdateUserInput {
   @IsOptional()
   @IsBoolean()
   isAdmin?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
