@@ -18,6 +18,7 @@ export class UserService {
         address: true,
         isAdmin: true,
         createdAt: true,
+        updatedAt: true,
         userTier: true,
       },
     });

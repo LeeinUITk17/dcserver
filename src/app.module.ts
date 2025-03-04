@@ -8,6 +8,12 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MenuitemModule } from './menu/menuitem/menuitem.module';
+import { InventoryItemModule } from './menu/inventory/inventory-item.module';
+import { SupplierItemModule } from './menu/supplier/supplier-item.module';
+import { TransactionModule } from './menu/inventory-transaction/transaction.module';
+import { RecipeModule } from './menu/recipe-ingredient/recipe.module';
+import { CategoryModule } from './menu/menu-category/category.module';
 
 @Module({
   imports: [
@@ -22,6 +28,12 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     AuthModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    MenuitemModule,
+    InventoryItemModule,
+    SupplierItemModule,
+    TransactionModule,
+    RecipeModule,
+    CategoryModule,
   ],
   providers: [AppService],
 })
