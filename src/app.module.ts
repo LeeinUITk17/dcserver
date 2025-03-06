@@ -14,6 +14,25 @@ import { SupplierItemModule } from './menu/supplier/supplier-item.module';
 import { TransactionModule } from './menu/inventory-transaction/transaction.module';
 import { RecipeModule } from './menu/recipe-ingredient/recipe.module';
 import { CategoryModule } from './menu/menu-category/category.module';
+import { CouponModule } from './coupon/coupon/coupon.module';
+import { CampaignModule } from './coupon/campaign/campaign.module';
+import { CouponPoolModule } from './coupon/coupon-pool/coupon-pool.module';
+import { CouponTargetModule } from './coupon/coupon-target/coupon-target.module';
+import { CouponUsageModule } from './coupon/coupon-usage/coupon-usage.module';
+import { EmployeeModule } from './employee/employee/employee.module';
+import { LeaveRequestModule } from './employee/leave-request/leave-request.module';
+import { OvertimeRequestModule } from './employee/overtime-request/overtime-request.module';
+import { AttendanceModule } from './employee/attendance/attendance.module';
+import { PayrollModule } from './employee/payroll/payroll.module';
+import { WorkScheduleModule } from './employee/work-schedule/work-schedule.module';
+import { OrderModule } from './order/order/order.module';
+import { TableModule } from './order/table/table.module';
+import { ReviewModule } from './order/review/review.module';
+import { ReservationModule } from './order/reservation/reservation.module';
+import { PaymentModule } from './order/payment/payment.module';
+import { DeliveryModule } from './order/delivery/delivery.module';
+import { StatusHistoryModule } from './order/status-history/status-history.module';
+import { OrderItemModule } from './order/order-item/order-item.module';
 
 @Module({
   imports: [
@@ -34,6 +53,25 @@ import { CategoryModule } from './menu/menu-category/category.module';
     TransactionModule,
     RecipeModule,
     CategoryModule,
+    CouponModule,
+    CampaignModule,
+    CouponPoolModule,
+    CouponTargetModule,
+    CouponUsageModule,
+    EmployeeModule,
+    LeaveRequestModule,
+    OvertimeRequestModule,
+    AttendanceModule,
+    PayrollModule,
+    WorkScheduleModule,
+    OrderModule,
+    TableModule,
+    ReviewModule,
+    ReservationModule,
+    PaymentModule,
+    DeliveryModule,
+    StatusHistoryModule,
+    OrderItemModule,
   ],
   providers: [AppService],
 })
