@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { BulkCreateCampaignsDto } from './dto/bulk-create-campaign.dto';
 
 @Controller('campaign')
 export class CampaignController {
@@ -19,16 +28,23 @@ export class CampaignController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.campaignService.findOne(+id);
+    return this.campaignService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCampaignDto: UpdateCampaignDto) {
-    return this.campaignService.update(+id, updateCampaignDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCampaignDto: UpdateCampaignDto,
+  ) {
+    return this.campaignService.update(id, updateCampaignDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.campaignService.remove(+id);
+    return this.campaignService.remove(id);
+  }
+  @Post('bulk')
+  async bulkCreate(@Body() dto: BulkCreateCampaignsDto) {
+    return this.campaignService.bulkCreate(dto.campaigns);
   }
 }

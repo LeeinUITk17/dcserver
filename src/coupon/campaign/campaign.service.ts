@@ -1,26 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
-
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class CampaignService {
-  create(createCampaignDto: CreateCampaignDto) {
-    return 'This action adds a new campaign';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCampaignDto: CreateCampaignDto) {
+    return this.prisma.campaign.create({
+      data: createCampaignDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all campaign`;
+  async findAll() {
+    return this.prisma.campaign.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} campaign`;
+  async findOne(id: string) {
+    return this.prisma.campaign.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, updateCampaignDto: UpdateCampaignDto) {
-    return `This action updates a #${id} campaign`;
+  async update(id: string, updateCampaignDto: UpdateCampaignDto) {
+    return this.prisma.campaign.update({
+      where: { id },
+      data: updateCampaignDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} campaign`;
+  async remove(id: string) {
+    return this.prisma.campaign.delete({
+      where: { id },
+    });
+  }
+
+  async bulkCreate(campaigns: Prisma.CampaignCreateManyInput[]) {
+    return this.prisma.campaign.createMany({
+      data: campaigns,
+      skipDuplicates: true,
+    });
   }
 }
