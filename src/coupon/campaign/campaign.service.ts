@@ -14,12 +14,13 @@ export class CampaignService {
   }
 
   async findAll() {
-    return this.prisma.campaign.findMany();
+    return this.prisma.campaign.findMany({ include: { couponPools: true } });
   }
 
   async findOne(id: string) {
     return this.prisma.campaign.findUnique({
       where: { id },
+      include: { couponPools: true },
     });
   }
 
