@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateLeaveRequestDto } from './dto/create-leave-request.dto';
 import { UpdateLeaveRequestDto } from './dto/update-leave-request.dto';
 
 @Injectable()
 export class LeaveRequestService {
-  create(createLeaveRequestDto: CreateLeaveRequestDto) {
-    return 'This action adds a new leaveRequest';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createLeaveRequestDto: CreateLeaveRequestDto) {
+    return this.prisma.leaveRequest.create({
+      data: createLeaveRequestDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all leaveRequest`;
+  async findAll() {
+    return this.prisma.leaveRequest.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} leaveRequest`;
+  async findOne(id: string) {
+    const leaveRequest = await this.prisma.leaveRequest.findUnique({
+      where: { id },
+    });
+    if (!leaveRequest) {
+      throw new NotFoundException(`Leave request with ID ${id} not found`);
+    }
+    return leaveRequest;
   }
 
-  update(id: number, updateLeaveRequestDto: UpdateLeaveRequestDto) {
-    return `This action updates a #${id} leaveRequest`;
+  async update(id: string, updateLeaveRequestDto: UpdateLeaveRequestDto) {
+    const leaveRequest = await this.prisma.leaveRequest.findUnique({
+      where: { id },
+    });
+    if (!leaveRequest) {
+      throw new NotFoundException(`Leave request with ID ${id} not found`);
+    }
+    return this.prisma.leaveRequest.update({
+      where: { id },
+      data: updateLeaveRequestDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} leaveRequest`;
+  async remove(id: string) {
+    const leaveRequest = await this.prisma.leaveRequest.findUnique({
+      where: { id },
+    });
+    if (!leaveRequest) {
+      throw new NotFoundException(`Leave request with ID ${id} not found`);
+    }
+    return this.prisma.leaveRequest.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

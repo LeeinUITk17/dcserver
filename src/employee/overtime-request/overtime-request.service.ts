@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOvertimeRequestDto } from './dto/create-overtime-request.dto';
 import { UpdateOvertimeRequestDto } from './dto/update-overtime-request.dto';
 
 @Injectable()
 export class OvertimeRequestService {
-  create(createOvertimeRequestDto: CreateOvertimeRequestDto) {
-    return 'This action adds a new overtimeRequest';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createOvertimeRequestDto: CreateOvertimeRequestDto) {
+    return this.prisma.overtimeRequest.create({
+      data: createOvertimeRequestDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all overtimeRequest`;
+  async findAll() {
+    return this.prisma.overtimeRequest.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} overtimeRequest`;
+  async findOne(id: string) {
+    const overtimeRequest = await this.prisma.overtimeRequest.findUnique({
+      where: { id },
+    });
+    if (!overtimeRequest) {
+      throw new NotFoundException(`Overtime request with ID ${id} not found`);
+    }
+    return overtimeRequest;
   }
 
-  update(id: number, updateOvertimeRequestDto: UpdateOvertimeRequestDto) {
-    return `This action updates a #${id} overtimeRequest`;
+  async update(id: string, updateOvertimeRequestDto: UpdateOvertimeRequestDto) {
+    const overtimeRequest = await this.prisma.overtimeRequest.findUnique({
+      where: { id },
+    });
+    if (!overtimeRequest) {
+      throw new NotFoundException(`Overtime request with ID ${id} not found`);
+    }
+    return this.prisma.overtimeRequest.update({
+      where: { id },
+      data: updateOvertimeRequestDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} overtimeRequest`;
+  async remove(id: string) {
+    const overtimeRequest = await this.prisma.overtimeRequest.findUnique({
+      where: { id },
+    });
+    if (!overtimeRequest) {
+      throw new NotFoundException(`Overtime request with ID ${id} not found`);
+    }
+    return this.prisma.overtimeRequest.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

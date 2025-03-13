@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { LeaveRequestService } from './leave-request.service';
 import { CreateLeaveRequestDto } from './dto/create-leave-request.dto';
 import { UpdateLeaveRequestDto } from './dto/update-leave-request.dto';
@@ -19,16 +27,19 @@ export class LeaveRequestController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.leaveRequestService.findOne(+id);
+    return this.leaveRequestService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLeaveRequestDto: UpdateLeaveRequestDto) {
-    return this.leaveRequestService.update(+id, updateLeaveRequestDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateLeaveRequestDto: UpdateLeaveRequestDto,
+  ) {
+    return this.leaveRequestService.update(id, updateLeaveRequestDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.leaveRequestService.remove(+id);
+    return this.leaveRequestService.remove(id);
   }
 }

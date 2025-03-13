@@ -76,8 +76,9 @@ export class CouponPoolService {
   }
 
   async remove(id: string) {
-    return this.prisma.couponPool.delete({
+    return this.prisma.couponPool.update({
       where: { id },
+      data: { isDeleted: true },
     });
   }
 

@@ -32,8 +32,9 @@ export class CampaignService {
   }
 
   async remove(id: string) {
-    return this.prisma.campaign.delete({
+    return this.prisma.campaign.update({
       where: { id },
+      data: { isDeleted: true },
     });
   }
 

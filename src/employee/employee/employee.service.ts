@@ -31,8 +31,9 @@ export class EmployeeService {
   }
 
   async remove(id: string) {
-    return this.prisma.employee.delete({
+    return this.prisma.employee.update({
       where: { id },
+      data: { isDeleted: true },
     });
   }
 }

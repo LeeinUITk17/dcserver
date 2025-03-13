@@ -31,8 +31,9 @@ export class CouponService {
   }
 
   async remove(id: string) {
-    return this.prisma.coupon.delete({
+    return this.prisma.coupon.update({
       where: { id },
+      data: { isDeleted: true },
     });
   }
   async assignToPool(couponId: string, poolId: string) {
