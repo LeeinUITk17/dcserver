@@ -1,32 +1,90 @@
-/* eslint-disable prettier/prettier */
-import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Get,
+  Req,
+} from '@nestjs/common';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from './admin.gaurd';
 
 @Controller('auth')
-@UseGuards(AuthGuard('jwt'))
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
-  async signup(@Body() body: { name: string; email: string; password: string }) {
-    return this.authService.signup(body);
+  async signup(
+    @Body()
+    body: { name: string; email: string; password: string; phone?: string },
+    @Res() res: Response,
+  ) {
+    const tokens = await this.authService.signup(body);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Signup successful' });
   }
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body);
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res() res: Response,
+  ) {
+    const tokens = await this.authService.login(body);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Login successful' });
   }
+
   @Get('profile')
-async getProfile(@Req() req) {
-  return req.user;  
-}
- @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
-    return this.authService.refreshToken(body.refreshToken);
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(@Req() req) {
+    return req.user;
   }
+
+  @Post('refresh')
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken)
+      return res.status(401).send({ message: 'No refresh token' });
+
+    const tokens = await this.authService.refreshToken(refreshToken);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Token refreshed' });
+  }
+
   @Post('logout')
-  async logout(@Body() body: { refreshToken: string }) {
-    return this.authService.logout(body.refreshToken);
+  async logout(@Res() res: Response) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    return res.send({ message: 'Logged out successfully' });
+  }
+
+  private setAuthCookies(
+    res: Response,
+    tokens: { accessToken: string; refreshToken: string },
+  ) {
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: true, // Set to `true` in production (for HTTPS)
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+  }
+  @Post('promote')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  promoteUserToEmployee(
+    @Body() body: { userId: string; position: string; salary: number },
+  ) {
+    const { userId, position, salary } = body;
+    return this.authService.promoteUserToEmployee(userId, position, salary);
   }
 }

@@ -1,21 +1,41 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { PrismaService } from '../prisma/prisma.service';
-import * as dotenv from 'dotenv';
-dotenv.config();
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { PrismaService } from 'src/prisma/prisma.service'; // Import PrismaService để truy vấn DB
+
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private prisma: PrismaService) {
+    // Inject PrismaService
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          console.log('Cookies in JwtStrategy:', request.cookies); // Debug
+          return request?.cookies?.accessToken || null;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
-    return this.prisma.user.findUnique({ where: { id: payload.sub } });
+  async validate(payload: any) {
+    // Truy vấn DB để lấy thông tin user đầy đủ
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        isAdmin: true,
+      }, // Chọn các trường bạn cần
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user; // Trả về toàn bộ thông tin user
   }
 }

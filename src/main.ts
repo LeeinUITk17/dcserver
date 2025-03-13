@@ -1,33 +1,24 @@
-import * as cluster from 'cluster';
-import * as os from 'os';
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-
+import * as passport from 'passport';
 async function bootstrap() {
-  // Ép kiểu để TypeScript không báo lỗi
-  const isPrimary = (cluster as any).isPrimary || (cluster as any).isMaster;
+  const app = await NestFactory.create(AppModule);
 
-  if (isPrimary) {
-    const numCPUs = os.cpus().length;
-    Logger.log(`Primary server is running. Spawning ${numCPUs} workers...`);
+  // Bật CORS nếu frontend gọi API từ domain khác
+  app.enableCors({
+    origin: 'http://localhost:3000', // Thay đổi tùy vào môi trường
+    credentials: true,
+  });
 
-    for (let i = 0; i < numCPUs; i++) {
-      (cluster as any).fork(); // Tạo worker
-    }
-
-    (cluster as any).on('exit', (worker: any) => {
-      Logger.warn(
-        `Worker ${worker.process.pid} exited. Spawning a new worker...`,
-      );
-      (cluster as any).fork(); // Tạo lại worker khi có lỗi
-    });
-  } else {
-    const app = await NestFactory.create(AppModule);
-    const port = 3000;
-    await app.listen(port);
-    Logger.log(`Worker ${process.pid} is running on port ${port}`);
-  }
+  // Middleware hỗ trợ cookies
+  app.use(cookieParser());
+  app.use(passport.initialize());
+  // Lắng nghe trên cổng 3000
+  const port = 3000;
+  await app.listen(port);
+  Logger.log(`Server is running on http://localhost:${port}`);
 }
 
 bootstrap();

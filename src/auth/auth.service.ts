@@ -32,7 +32,7 @@ export class AuthService {
         name: data.name,
         email: data.email,
         password: hashedPassword,
-        phone: data.phone, // Add phone field here
+        phone: data.phone,
       },
     });
 
@@ -74,7 +74,7 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     const token = await this.prisma.token.findUnique({
-      where: { refreshToken: refreshToken },
+      where: { refreshToken },
     });
 
     if (!token || dayjs(token.expiresAt).isBefore(dayjs())) {
@@ -85,10 +85,52 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
+    const token = await this.prisma.token.findUnique({
+      where: { refreshToken: refreshToken },
+    });
+
+    console.log('Logging out with refreshToken:', refreshToken);
+    console.log('Token found in DB:', token);
+
+    if (!token) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     await this.prisma.token.delete({
       where: { refreshToken: refreshToken },
     });
 
     return { message: 'Logout successful' };
+  }
+  async promoteUserToEmployee(
+    userId: string,
+    position: string,
+    salary: number,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { employee: true },
+    });
+
+    if (!user) throw new Error('User not found');
+    if (user.employee) throw new Error('User is already an employee');
+
+    // Tạo Employee mới
+    const employee = await this.prisma.employee.create({
+      data: {
+        userId: userId,
+        position: position,
+        salary: salary,
+        hireDate: new Date(),
+      },
+    });
+
+    // Cập nhật User (nếu có cột isEmployee)
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { isEmployee: true },
+    });
+
+    return employee;
   }
 }

@@ -4,17 +4,18 @@ import {
   ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
+
 @Injectable()
 export class AdminGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    const user = request.user;
-    if (!user) {
+    const request = context.switchToHttp().getRequest();
+    console.log('Cookies:', request.cookies); // Kiểm tra xem cookies có không
+    console.log('User in AdminGuard:', request.user); // Kiểm tra user
+
+    if (!request.user) {
       throw new ForbiddenException('User is not authenticated.');
     }
-    if (!user.isAdmin) {
+    if (!request.user.isAdmin) {
       throw new ForbiddenException('Access denied: Admins only.');
     }
     return true;
