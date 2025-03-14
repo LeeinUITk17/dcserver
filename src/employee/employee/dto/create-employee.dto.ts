@@ -1,11 +1,12 @@
-import { IsString, IsDecimal, IsDateString } from 'class-validator';
+import { IsString, IsDecimal, IsDateString, IsEnum } from 'class-validator';
+import { Role } from '@prisma/client';
 
 export class CreateEmployeeDto {
   @IsString()
   userId: string;
 
-  @IsString()
-  position: string;
+  @IsEnum(Role)
+  role: Role;
 
   @IsDecimal()
   salary: number;

@@ -11,6 +11,7 @@ import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from './admin.gaurd';
+import { Role } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -82,9 +83,9 @@ export class AuthController {
   @Post('promote')
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   promoteUserToEmployee(
-    @Body() body: { userId: string; position: string; salary: number },
+    @Body() body: { userId: string; role: Role; salary: number },
   ) {
-    const { userId, position, salary } = body;
-    return this.authService.promoteUserToEmployee(userId, position, salary);
+    const { userId, role, salary } = body;
+    return this.authService.promoteUserToEmployee(userId, role, salary);
   }
 }

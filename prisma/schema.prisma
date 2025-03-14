@@ -34,8 +34,8 @@ model User {
 model Employee {
   id        String      @id @default(uuid())
   userId    String      @unique
-  position  String
-  salary    Decimal
+  salary           Decimal?  // Dành cho Full-time
+  hourlyRate       Decimal?  // Dành cho Part-time
   hireDate  DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   workSchedules WorkSchedule[]  @relation("EmployeeWorkSchedules")
@@ -43,6 +43,9 @@ model Employee {
   attendances Attendance[] @relation("EmployeeAttendance")
   overtimeRequests OvertimeRequest[]  @relation("EmployeeOvertimeRequests")
   payrolls Payroll[]  @relation("EmployeePayrolls")
+  role             Role
+  employmentType   EmploymentType @default(FULL_TIME)
+  employmentStatus EmploymentStatus @default(ACTIVE)
   isDeleted   Boolean @default(false)
 }
 
@@ -51,10 +54,21 @@ model WorkSchedule {
   employee   Employee @relation("EmployeeWorkSchedules", fields: [employeeId], references: [id])
   employeeId String
   date       DateTime
+  shiftTemplateId String?  // Liên kết với ca mẫu
+  shiftTemplate   ShiftTemplate? @relation("ShiftTemplateWorkSchedules", fields: [shiftTemplateId], references: [id])
   shiftStart DateTime
   shiftEnd   DateTime
   createdAt  DateTime @default(now())
   isDeleted  Boolean  @default(false)
+}
+
+model ShiftTemplate {
+  id         String   @id @default(uuid())
+  name       String   @unique  // Tên ca: "Ca Sáng", "Ca Chiều"
+  shiftType  ShiftType
+  startTime  String
+  endTime    String
+  workSchedules WorkSchedule[] @relation("ShiftTemplateWorkSchedules")
 }
 
 enum LeaveStatus {
@@ -116,15 +130,41 @@ model Payroll {
   id          String   @id @default(uuid())
   employeeId  String
   employee    Employee @relation("EmployeePayrolls", fields: [employeeId], references: [id])
-  month       Int
-  year        Int
-  baseSalary  Decimal
-  standardHours Int
-  workedHours   Int
-  bonus       Decimal?
-  deductions  Decimal?
-  totalSalary Decimal
+  baseSalary  Decimal? // Chỉ áp dụng cho Full-time
+  hourlyRate  Decimal? // Chỉ áp dụng cho Part-time
+  workedHours Int?     // Chỉ có nếu là nhân viên Part-time
+  standardHours Int?
+  overtimePay Decimal @default(0)
+  deductions  Decimal @default(0)
+  netSalary   Decimal
   createdAt   DateTime @default(now())
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  RESIGNED
+  TERMINATED
+  ON_LEAVE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+}
+
+enum Role {
+  MANAGER
+  CASHIER
+  COOK
+  WAITER
+  DELIVERY
+}
+
+enum ShiftType {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
 }
 
 model Table {
@@ -282,8 +322,8 @@ model InventoryTransaction {
   inventoryItemId String
   transactionType TransactionType
   quantity       Int
+  price         Decimal?  // Giá của từng lần nhập/xuất kho
   timestamp      DateTime @default(now())
-
   inventoryItem  InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }
 

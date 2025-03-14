@@ -1,8 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as dayjs from 'dayjs';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -102,30 +108,27 @@ export class AuthService {
 
     return { message: 'Logout successful' };
   }
-  async promoteUserToEmployee(
-    userId: string,
-    position: string,
-    salary: number,
-  ) {
+  async promoteUserToEmployee(userId: string, role: Role, salary: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { employee: true },
     });
 
-    if (!user) throw new Error('User not found');
-    if (user.employee) throw new Error('User is already an employee');
+    if (!user) throw new NotFoundException('User not found');
+    if (user.employee)
+      throw new BadRequestException('User is already an employee');
 
-    // Tạo Employee mới
+    // Create new Employee
     const employee = await this.prisma.employee.create({
       data: {
         userId: userId,
-        position: position,
+        role: role,
         salary: salary,
         hireDate: new Date(),
       },
     });
 
-    // Cập nhật User (nếu có cột isEmployee)
+    // Update User (if there is a column isEmployee)
     await this.prisma.user.update({
       where: { id: userId },
       data: { isEmployee: true },
