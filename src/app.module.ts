@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -33,7 +33,10 @@ import { PaymentModule } from './order/payment/payment.module';
 import { DeliveryModule } from './order/delivery/delivery.module';
 import { StatusHistoryModule } from './order/status-history/status-history.module';
 import { OrderItemModule } from './order/order-item/order-item.module';
-
+import { ShiftModule } from './employee/shift/shift.module';
+import { PayrollMiddleware } from './middleware/payroll.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronJobService } from './node-cron/cron-job.service';
 @Module({
   imports: [
     PrismaModule,
@@ -44,6 +47,7 @@ import { OrderItemModule } from './order/order-item/order-item.module';
       playground: true,
       introspection: true,
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     AuthModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -72,12 +76,17 @@ import { OrderItemModule } from './order/order-item/order-item.module';
     DeliveryModule,
     StatusHistoryModule,
     OrderItemModule,
+    ShiftModule,
   ],
-  providers: [AppService],
+  providers: [AppService, CronJobService],
 })
 // export class AppModule implements NestModule {
 //   configure(consumer: MiddlewareConsumer) {
 //     consumer.apply(ProxyMiddleware).forRoutes('*');
 //   }
 // }
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PayrollMiddleware).forRoutes('*'); // Middleware chạy cho tất cả routes
+  }
+}

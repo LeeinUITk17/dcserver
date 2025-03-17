@@ -69,22 +69,4 @@ export class UserService {
       },
     });
   }
-
-  async rulePermission(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { isAdmin: true },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-    if (!user.isAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission for this action',
-      );
-    }
-
-    return true;
-  }
 }

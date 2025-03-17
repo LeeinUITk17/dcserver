@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -135,5 +136,22 @@ export class AuthService {
     });
 
     return employee;
+  }
+  async rulePermission(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isAdmin: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    if (!user.isAdmin) {
+      throw new ForbiddenException(
+        'You do not have permission for this action',
+      );
+    }
+
+    return { message: 'You have permission' };
   }
 }

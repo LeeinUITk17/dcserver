@@ -6,6 +6,7 @@ import {
   UseGuards,
   Get,
   Req,
+  Param,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -87,5 +88,10 @@ export class AuthController {
   ) {
     const { userId, role, salary } = body;
     return this.authService.promoteUserToEmployee(userId, role, salary);
+  }
+  @Post(':id/rule-permission')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  async rulePermission(@Param('id') userId: string) {
+    return this.authService.rulePermission(userId);
   }
 }

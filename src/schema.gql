@@ -10,7 +10,6 @@ type User {
 type Query {
   getAllUsers: [User!]!
   getUserById(id: String!): User!
-  checkAdminPermission: Boolean!
 }
 
 type Mutation {

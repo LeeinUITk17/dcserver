@@ -29,6 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         name: true,
         email: true,
         isAdmin: true,
+        isEmployee: true,
       }, // Chọn các trường bạn cần
     });
 

@@ -31,11 +31,4 @@ export class UserResolver {
     const requestUser = context.user;
     return this.userService.updateUserInfo(id, updateData, requestUser);
   }
-
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Query(() => Boolean, { name: 'checkAdminPermission' })
-  async checkAdminPermission(@Context('req') context: any) {
-    const requestUser = context.user;
-    return this.userService.rulePermission(requestUser.id);
-  }
 }

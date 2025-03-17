@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  UseGuards,
   Body,
   Patch,
   Param,
@@ -11,8 +12,10 @@ import { SupplierItemService } from './supplier-item.service';
 import { CreateSupplierItemDto } from './dto/create-supplier-item.dto';
 import { UpdateSupplierItemDto } from './dto/update-supplier-item.dto';
 import { BulkCreateSuppliersDto } from './dto/bulk-create-suppliers.dto';
-
+import { AuthGuard } from '@nestjs/passport';
+import { StaffGuard } from './../../auth/staff.gaurd';
 @Controller('supplier-item')
+@UseGuards(AuthGuard('jwt'), StaffGuard)
 export class SupplierItemController {
   constructor(private readonly supplierItemService: SupplierItemService) {}
 

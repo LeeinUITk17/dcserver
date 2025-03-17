@@ -25,9 +25,4 @@ export class UserController {
     const requestUser = request.user;
     return this.userService.updateUserInfo(userId, updateData, requestUser);
   }
-
-  @Get(':id/rule-permission')
-  async rulePermission(@Param('id') userId: string) {
-    return this.userService.rulePermission(userId);
-  }
 }

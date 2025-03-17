@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 
 @Injectable()
 export class InventoryItemService {
-  create(createInventoryItemDto: CreateInventoryItemDto) {
-    return 'This action adds a new inventoryItem';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createInventoryItemDto: CreateInventoryItemDto) {
+    return this.prisma.inventoryItem.create({
+      data: createInventoryItemDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all inventoryItem`;
+  async findAll() {
+    return this.prisma.inventoryItem.findMany({
+      where: { isDeleted: false },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} inventoryItem`;
+  async findOne(id: string) {
+    const inventoryItem = await this.prisma.inventoryItem.findUnique({
+      where: { id },
+    });
+    if (!inventoryItem) {
+      throw new NotFoundException(`Inventory item with ID ${id} not found`);
+    }
+    return inventoryItem;
   }
 
-  update(id: number, updateInventoryItemDto: UpdateInventoryItemDto) {
-    return `This action updates a #${id} inventoryItem`;
+  async update(id: string, updateInventoryItemDto: UpdateInventoryItemDto) {
+    const inventoryItem = await this.prisma.inventoryItem.findUnique({
+      where: { id },
+    });
+    if (!inventoryItem) {
+      throw new NotFoundException(`Inventory item with ID ${id} not found`);
+    }
+    return this.prisma.inventoryItem.update({
+      where: { id },
+      data: updateInventoryItemDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} inventoryItem`;
+  async remove(id: string) {
+    const inventoryItem = await this.prisma.inventoryItem.findUnique({
+      where: { id },
+    });
+    if (!inventoryItem) {
+      throw new NotFoundException(`Inventory item with ID ${id} not found`);
+    }
+    return this.prisma.inventoryItem.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

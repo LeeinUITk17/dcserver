@@ -53,7 +53,6 @@ model WorkSchedule {
   id         String   @id @default(uuid())
   employee   Employee @relation("EmployeeWorkSchedules", fields: [employeeId], references: [id])
   employeeId String
-  date       DateTime
   shiftTemplateId String?  // Liên kết với ca mẫu
   shiftTemplate   ShiftTemplate? @relation("ShiftTemplateWorkSchedules", fields: [shiftTemplateId], references: [id])
   shiftStart DateTime
@@ -322,7 +321,7 @@ model InventoryTransaction {
   inventoryItemId String
   transactionType TransactionType
   quantity       Int
-  price         Decimal?  // Giá của từng lần nhập/xuất kho
+  price         Decimal  // Giá của từng lần nhập/xuất kho
   timestamp      DateTime @default(now())
   inventoryItem  InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }
