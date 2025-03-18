@@ -28,7 +28,7 @@
 
 ## DB Diagram
 
-![Untitled](https://github.com/user-attachments/assets/3fe5da7e-3836-4543-a6d9-daa2f8e34363)
+![Untitled](https://github.com/user-attachments/assets/57401439-2eb4-41b7-9e31-fd3830eac8e2)
 
 ## Installation
 
