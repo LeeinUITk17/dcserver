@@ -1,26 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 
 @Injectable()
 export class RecipeService {
-  create(createRecipeDto: CreateRecipeDto) {
-    return 'This action adds a new recipe';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createRecipeDto: CreateRecipeDto) {
+    return this.prisma.recipeIngredient.create({
+      data: createRecipeDto,
+    });
+  }
+  async createMany(createRecipeDto: CreateRecipeDto[]) {
+    return this.prisma.recipeIngredient.createMany({
+      data: createRecipeDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all recipe`;
+  async findAll() {
+    return this.prisma.recipeIngredient.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} recipe`;
+  async findOne(id: string) {
+    const recipeIngredient = await this.prisma.recipeIngredient.findUnique({
+      where: { id },
+    });
+    if (!recipeIngredient) {
+      throw new NotFoundException(`Recipe ingredient with ID ${id} not found`);
+    }
+    return recipeIngredient;
   }
 
-  update(id: number, updateRecipeDto: UpdateRecipeDto) {
-    return `This action updates a #${id} recipe`;
+  async update(id: string, updateRecipeDto: UpdateRecipeDto) {
+    const recipeIngredient = await this.prisma.recipeIngredient.findUnique({
+      where: { id },
+    });
+    if (!recipeIngredient) {
+      throw new NotFoundException(`Recipe ingredient with ID ${id} not found`);
+    }
+    return this.prisma.recipeIngredient.update({
+      where: { id },
+      data: updateRecipeDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} recipe`;
+  async remove(id: string) {
+    const recipeIngredient = await this.prisma.recipeIngredient.findUnique({
+      where: { id },
+    });
+    if (!recipeIngredient) {
+      throw new NotFoundException(`Recipe ingredient with ID ${id} not found`);
+    }
+    return this.prisma.recipeIngredient.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

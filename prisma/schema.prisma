@@ -311,7 +311,7 @@ model RecipeIngredient {
   inventoryItemId String
   quantity      Int
   unit          String
-
+  isDeleted   Boolean @default(false)  
   menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }

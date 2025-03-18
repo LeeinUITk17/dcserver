@@ -1,34 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { MenuitemService } from './menuitem.service';
 import { CreateMenuitemDto } from './dto/create-menuitem.dto';
 import { UpdateMenuitemDto } from './dto/update-menuitem.dto';
-
-@Controller('menuitem')
+import { AuthGuard } from '@nestjs/passport';
+import { StaffGuard } from './../../auth/staff.gaurd';
+@Controller('menu-items')
+@UseGuards(AuthGuard('jwt'), StaffGuard)
 export class MenuitemController {
   constructor(private readonly menuitemService: MenuitemService) {}
 
   @Post()
-  create(@Body() createMenuitemDto: CreateMenuitemDto) {
-    return this.menuitemService.create(createMenuitemDto);
+  async create(@Body() createMenuItemDto: CreateMenuitemDto) {
+    return this.menuitemService.create(createMenuItemDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.menuitemService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.menuitemService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return this.menuitemService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMenuitemDto: UpdateMenuitemDto) {
-    return this.menuitemService.update(+id, updateMenuitemDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateMenuItemDto: UpdateMenuitemDto,
+  ) {
+    return this.menuitemService.update(id, updateMenuItemDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.menuitemService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.menuitemService.remove(id);
   }
 }
