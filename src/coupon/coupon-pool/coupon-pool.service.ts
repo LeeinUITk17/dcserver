@@ -42,19 +42,49 @@ export class CouponPoolService {
     // Cập nhật campaignId cho Pool
     await this.prisma.couponPool.update({
       where: { id: poolId },
-      data: { campaignId },
+      data: {
+        campaignId: campaignId,
+        allocatedCount: pool.coupons.length,
+      },
     });
 
     // Cập nhật tất cả Coupon trong Pool với campaignId mới
     if (pool.coupons.length > 0) {
       await this.prisma.coupon.updateMany({
-        where: { poolId: poolId },
-        data: { campaignId },
+        where: { poolId: poolId, isActive: true },
+        data: {
+          campaignId: campaignId,
+          status: 'ALLOCATED',
+          expiresAt: campaign.endDate,
+        },
+      });
+    }
+
+    // 🔹 Lấy danh sách user có userTier = campaign.userTier
+    const eligibleUsers = await this.prisma.user.findMany({
+      where: { userTier: campaign.userTier },
+      select: { id: true }, // Chỉ lấy userId để tạo CouponTarget
+    });
+
+    if (eligibleUsers.length > 0) {
+      const couponTargets = pool.coupons.flatMap((coupon) =>
+        eligibleUsers.map((user) => ({
+          couponId: coupon.id,
+          userId: user.id,
+          expiresAt: campaign.endDate,
+          userTier: campaign.userTier,
+          usageLimit: coupon.usageLimit,
+        })),
+      );
+
+      // 🔹 Tạo nhiều CouponTarget cho user thuộc tier phù hợp
+      await this.prisma.couponTarget.createMany({
+        data: couponTargets,
       });
     }
 
     return {
-      message: `Coupon Pool ${poolId} assigned to Campaign ${campaignId}`,
+      message: `Coupon Pool ${poolId} assigned to Campaign ${campaignId}, and CouponTargets created for eligible users.`,
     };
   }
 

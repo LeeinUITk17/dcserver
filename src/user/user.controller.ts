@@ -1,21 +1,33 @@
-import { Controller, Get, Param, Patch, Body, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Body,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-
+import { AuthGuard } from '@nestjs/passport';
+import { StaffGuard } from './../auth/staff.gaurd';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
   async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
   async getUserById(@Param('id') userId: string) {
     return this.userService.getUserById(userId);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
   async updateUserInfo(
     @Param('id') userId: string,
     @Body()

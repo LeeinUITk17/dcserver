@@ -424,8 +424,8 @@ model Coupon {
   updatedAt         DateTime  @updatedAt
   campaignId        String?
   campaign          Campaign? @relation(fields: [campaignId], references: [id])
-  poolId            String?
-  pool              CouponPool? @relation(fields: [poolId], references: [id])
+  poolId            String
+  pool              CouponPool @relation(fields: [poolId], references: [id])
   isDeleted   Boolean @default(false)
   orders            Order[]
   couponTargets     CouponTarget[]
@@ -446,6 +446,7 @@ model Campaign {
   coupons     Coupon[]
   couponPools CouponPool[]
   isDeleted   Boolean @default(false)
+  userTier    UserTier
 }
 
 model CouponTarget {
@@ -453,7 +454,7 @@ model CouponTarget {
   couponId  String
   userId    String?
   userTier  UserTier?
-  sentAt    DateTime?
+  sentAt    DateTime @default(now())
   expiresAt DateTime
   usageLimit  Int?       @default(1)
   coupon    Coupon @relation(fields: [couponId], references: [id])

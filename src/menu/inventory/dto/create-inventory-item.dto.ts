@@ -1,6 +1,12 @@
-import { IsString, IsInt, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsEnum,
+  IsDecimal,
+} from 'class-validator';
 import { InventoryCategory } from '@prisma/client';
-
+import { TransactionType } from '@prisma/client';
 export class CreateInventoryItemDto {
   @IsString()
   name: string;
@@ -17,4 +23,10 @@ export class CreateInventoryItemDto {
   @IsOptional()
   @IsString()
   supplierId?: string;
+
+  @IsDecimal()
+  price: number;
+
+  @IsEnum(TransactionType)
+  transactionType: TransactionType;
 }

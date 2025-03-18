@@ -60,7 +60,7 @@ export class CouponService {
     });
   }
   async bulkCreate(coupons: Prisma.CouponCreateManyInput[]) {
-    return this.prisma.coupon.createMany({
+    return await this.prisma.coupon.createMany({
       data: coupons,
       skipDuplicates: true,
     });

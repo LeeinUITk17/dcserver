@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCouponTargetDto } from './dto/create-coupon-target.dto';
 import { UpdateCouponTargetDto } from './dto/update-coupon-target.dto';
 
 @Injectable()
 export class CouponTargetService {
-  create(createCouponTargetDto: CreateCouponTargetDto) {
-    return 'This action adds a new couponTarget';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCouponTargetDto: CreateCouponTargetDto) {
+    return this.prisma.couponTarget.create({
+      data: createCouponTargetDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all couponTarget`;
+  async findAll() {
+    return this.prisma.couponTarget.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} couponTarget`;
+  async findOne(id: string) {
+    const couponTarget = await this.prisma.couponTarget.findUnique({
+      where: { id },
+    });
+    if (!couponTarget) {
+      throw new NotFoundException(`Coupon target with ID ${id} not found`);
+    }
+    return couponTarget;
   }
 
-  update(id: number, updateCouponTargetDto: UpdateCouponTargetDto) {
-    return `This action updates a #${id} couponTarget`;
+  async update(id: string, updateCouponTargetDto: UpdateCouponTargetDto) {
+    const couponTarget = await this.prisma.couponTarget.findUnique({
+      where: { id },
+    });
+    if (!couponTarget) {
+      throw new NotFoundException(`Coupon target with ID ${id} not found`);
+    }
+    return this.prisma.couponTarget.update({
+      where: { id },
+      data: updateCouponTargetDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} couponTarget`;
+  async remove(id: string) {
+    const couponTarget = await this.prisma.couponTarget.findUnique({
+      where: { id },
+    });
+    if (!couponTarget) {
+      throw new NotFoundException(`Coupon target with ID ${id} not found`);
+    }
+    return this.prisma.couponTarget.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

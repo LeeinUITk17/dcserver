@@ -4,7 +4,6 @@ import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 import { TransactionService } from '../inventory-transaction/transaction.service';
 import { CreateTransactionDto } from '../inventory-transaction/dto/create-transaction.dto';
-import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class InventoryItemService {
@@ -15,18 +14,24 @@ export class InventoryItemService {
 
   async create(
     createInventoryItemDto: CreateInventoryItemDto,
-    transactionType: string,
-    transactionPrice: Decimal,
+    // transactionType: string,
+    // transactionPrice: Decimal,
   ) {
     const inventoryItem = await this.prisma.inventoryItem.create({
-      data: createInventoryItemDto,
+      data: {
+        name: createInventoryItemDto.name,
+        quantity: createInventoryItemDto.quantity,
+        unit: createInventoryItemDto.unit,
+        supplierId: createInventoryItemDto.supplierId,
+        category: createInventoryItemDto.category,
+      },
     });
 
     const createTransactionDto: CreateTransactionDto = {
       inventoryItemId: inventoryItem.id,
       quantity: inventoryItem.quantity,
-      transactionType: transactionType as any,
-      price: transactionPrice.toNumber(),
+      transactionType: createInventoryItemDto.transactionType as any,
+      price: createInventoryItemDto.price,
       timestamp: new Date().toISOString(),
     };
 

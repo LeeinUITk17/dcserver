@@ -6,27 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { InventoryItemService } from './inventory-item.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
-import { Decimal } from '@prisma/client/runtime/library';
-
+import { AuthGuard } from '@nestjs/passport';
+import { StaffGuard } from './../../auth/staff.gaurd';
+@UseGuards(AuthGuard('jwt'), StaffGuard)
 @Controller('inventory-item')
 export class InventoryItemController {
   constructor(private readonly inventoryItemService: InventoryItemService) {}
 
-  @Post(':type/:price')
-  create(
-    @Body() createInventoryItemDto: CreateInventoryItemDto,
-    @Param('type') transactionType: string,
-    @Param('price') transactionPrice: string,
-  ) {
-    return this.inventoryItemService.create(
-      createInventoryItemDto,
-      transactionType,
-      new Decimal(transactionPrice),
-    );
+  @Post()
+  create(@Body() createInventoryItemDto: CreateInventoryItemDto) {
+    return this.inventoryItemService.create(createInventoryItemDto);
   }
 
   @Get()

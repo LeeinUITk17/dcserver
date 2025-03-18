@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsDateString } from 'class-validator';
-
+import { IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
+import { UserTier } from '@prisma/client';
 export class CreateCampaignDto {
   @IsString()
   name: string;
@@ -13,4 +13,7 @@ export class CreateCampaignDto {
 
   @IsDateString()
   endDate: string;
+
+  @IsEnum(UserTier)
+  userTier: UserTier;
 }

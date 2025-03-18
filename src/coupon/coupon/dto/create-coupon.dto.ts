@@ -44,5 +44,5 @@ export class CreateCouponDto {
 
   @IsOptional()
   @IsString()
-  poolId?: string;
+  poolId: string;
 }
