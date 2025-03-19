@@ -31,7 +31,6 @@ import { ReviewModule } from './order/review/review.module';
 import { ReservationModule } from './order/reservation/reservation.module';
 import { PaymentModule } from './order/payment/payment.module';
 import { DeliveryModule } from './order/delivery/delivery.module';
-import { StatusHistoryModule } from './order/status-history/status-history.module';
 import { OrderItemModule } from './order/order-item/order-item.module';
 import { ShiftModule } from './employee/shift/shift.module';
 import { PayrollMiddleware } from './middleware/payroll.middleware';
@@ -74,7 +73,6 @@ import { CronJobService } from './node-cron/cron-job.service';
     ReservationModule,
     PaymentModule,
     DeliveryModule,
-    StatusHistoryModule,
     OrderItemModule,
     ShiftModule,
   ],

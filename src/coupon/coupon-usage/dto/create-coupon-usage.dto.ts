@@ -8,5 +8,5 @@ export class CreateCouponUsageDto {
   userId: string;
 
   @IsDateString()
-  usedAt: string;
+  usedAt?: string;
 }

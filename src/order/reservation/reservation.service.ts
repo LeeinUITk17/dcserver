@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 
 @Injectable()
 export class ReservationService {
-  create(createReservationDto: CreateReservationDto) {
-    return 'This action adds a new reservation';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createReservationDto: CreateReservationDto) {
+    return this.prisma.reservation.create({
+      data: createReservationDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all reservation`;
+  async findAll() {
+    return this.prisma.reservation.findMany({
+      where: { isDeleted: false },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reservation`;
+  async findOne(id: string) {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+    if (!reservation) {
+      throw new NotFoundException(`Reservation with ID ${id} not found`);
+    }
+    return reservation;
   }
 
-  update(id: number, updateReservationDto: UpdateReservationDto) {
-    return `This action updates a #${id} reservation`;
+  async update(id: string, updateReservationDto: UpdateReservationDto) {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+    if (!reservation) {
+      throw new NotFoundException(`Reservation with ID ${id} not found`);
+    }
+    return this.prisma.reservation.update({
+      where: { id },
+      data: updateReservationDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} reservation`;
+  async remove(id: string) {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+    if (!reservation) {
+      throw new NotFoundException(`Reservation with ID ${id} not found`);
+    }
+    return this.prisma.reservation.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }

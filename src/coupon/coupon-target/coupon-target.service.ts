@@ -5,6 +5,7 @@ import { UpdateCouponTargetDto } from './dto/update-coupon-target.dto';
 
 @Injectable()
 export class CouponTargetService {
+  static findbyCoupnIdUserIds: any;
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCouponTargetDto: CreateCouponTargetDto) {
@@ -51,5 +52,16 @@ export class CouponTargetService {
       where: { id },
       data: { isDeleted: true },
     });
+  }
+  async findbyCoupnIdUserIds(couponId: string, userId: string) {
+    const couponTarget = await this.prisma.couponTarget.findFirst({
+      where: { couponId, userId, isDeleted: false },
+    });
+    if (!couponTarget) {
+      throw new NotFoundException(
+        `Coupon target with couponId ${couponId} and userId ${userId} not found`,
+      );
+    }
+    return couponTarget.id;
   }
 }

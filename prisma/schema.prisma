@@ -225,7 +225,7 @@ model MenuItem {
 
 model Order {
   id             String     @id @default(uuid())
-  userId         String
+  userId         String?
   tableId        String?
   orderType      OrderType
   orderDate      DateTime @default(now())
@@ -235,7 +235,7 @@ model Order {
   status         OrderStatus @default(PENDING)
   couponId       String?
   earnedPoint    Int      @default(0)
-  user           User  @relation(fields: [userId], references: [id])
+  user           User?  @relation(fields: [userId], references: [id])
   table          Table? @relation(fields: [tableId], references: [id])
   orderItems     OrderItem[]
   delivery       Delivery?
@@ -371,7 +371,6 @@ model Payment {
   amount      Decimal
   method      PaymentMethod
   status      PaymentStatus @default(PENDING)
-  transactionId String?
 
   order       Order @relation(fields: [orderId], references: [id])
 }

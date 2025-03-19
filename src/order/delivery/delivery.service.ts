@@ -1,26 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { UpdateDeliveryDto } from './dto/update-delivery.dto';
 
 @Injectable()
 export class DeliveryService {
-  create(createDeliveryDto: CreateDeliveryDto) {
-    return 'This action adds a new delivery';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createDeliveryDto: CreateDeliveryDto) {
+    return this.prisma.delivery.create({
+      data: createDeliveryDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all delivery`;
+  async findAll() {
+    return this.prisma.delivery.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} delivery`;
+  async findOne(id: string) {
+    const delivery = await this.prisma.delivery.findUnique({
+      where: { id },
+    });
+    if (!delivery) {
+      throw new NotFoundException(`Delivery with ID ${id} not found`);
+    }
+    return delivery;
+  }
+  async findbyTrackingNumber(trackingNumber: string) {
+    const delivery = await this.prisma.delivery.findFirst({
+      where: { trackingCode: trackingNumber },
+    });
+    if (!delivery) {
+      throw new NotFoundException(
+        `Delivery with Tracking Number ${trackingNumber} not found`,
+      );
+    }
+    return delivery;
   }
 
-  update(id: number, updateDeliveryDto: UpdateDeliveryDto) {
-    return `This action updates a #${id} delivery`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} delivery`;
+  async update(id: string, updateDeliveryDto: UpdateDeliveryDto) {
+    const delivery = await this.prisma.delivery.findUnique({
+      where: { id },
+    });
+    if (!delivery) {
+      throw new NotFoundException(`Delivery with ID ${id} not found`);
+    }
+    return this.prisma.delivery.update({
+      where: { id },
+      data: updateDeliveryDto,
+    });
   }
 }

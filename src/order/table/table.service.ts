@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 
 @Injectable()
 export class TableService {
-  create(createTableDto: CreateTableDto) {
-    return 'This action adds a new table';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createTableDto: CreateTableDto) {
+    return this.prisma.table.create({
+      data: createTableDto,
+    });
+  }
+  async bulkCreate(createTablesDto: CreateTableDto[]) {
+    return await this.prisma.table.createMany({
+      data: createTablesDto,
+      skipDuplicates: true,
+    });
   }
 
-  findAll() {
-    return `This action returns all table`;
+  async findAll() {
+    return this.prisma.table.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} table`;
+  async findOne(id: string) {
+    const table = await this.prisma.table.findUnique({
+      where: { id },
+    });
+    if (!table) {
+      throw new NotFoundException(`Table with ID ${id} not found`);
+    }
+    return table;
   }
 
-  update(id: number, updateTableDto: UpdateTableDto) {
-    return `This action updates a #${id} table`;
+  async update(id: string, updateTableDto: UpdateTableDto) {
+    const table = await this.prisma.table.findUnique({
+      where: { id },
+    });
+    if (!table) {
+      throw new NotFoundException(`Table with ID ${id} not found`);
+    }
+    return this.prisma.table.update({
+      where: { id },
+      data: updateTableDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} table`;
+  async remove(id: string) {
+    const table = await this.prisma.table.findUnique({
+      where: { id },
+    });
+    if (!table) {
+      throw new NotFoundException(`Table with ID ${id} not found`);
+    }
+    return this.prisma.table.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 }
