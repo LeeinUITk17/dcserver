@@ -4,11 +4,10 @@ import {
   IsEnum,
   IsDecimal,
   IsInt,
-  IsDateString,
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { OrderType, OrderStatus, PaymentMethod } from '@prisma/client';
+import { OrderType } from '@prisma/client';
 import { Type } from 'class-transformer';
 
 class OrderItemDto {
@@ -33,37 +32,18 @@ export class CreateOrderDto {
   @IsEnum(OrderType)
   orderType: OrderType;
 
-  @IsDateString()
-  orderDate: string;
-
   @IsDecimal()
-  totalAmount: number;
-
-  @IsDecimal()
-  shippingFee: number;
-
-  @IsDecimal()
-  taxAmount: number;
-
-  @IsEnum(OrderStatus)
-  status: OrderStatus;
+  shippingFee?: number;
 
   @IsOptional()
   @IsString()
   couponId?: string;
 
-  @IsInt()
-  earnedPoint: number;
+  // @IsInt()
+  // earnedPoint: number;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   orderItems: OrderItemDto[];
-
-  @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
-
-  @IsOptional()
-  @IsString()
-  trackingCode?: string;
 }

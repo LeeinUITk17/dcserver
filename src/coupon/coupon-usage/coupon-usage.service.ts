@@ -63,7 +63,7 @@ export class CouponUsageService {
           data: { isDeleted: true },
         });
 
-        return 'success';
+        return coupon;
       })
       .catch((error) => {
         console.error('Transaction failed:', error);

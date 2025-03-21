@@ -1,5 +1,4 @@
-import { IsString, IsInt, IsEnum } from 'class-validator';
-import { TableStatus } from '@prisma/client';
+import { IsString, IsInt } from 'class-validator';
 
 export class CreateTableDto {
   @IsString()
@@ -7,7 +6,4 @@ export class CreateTableDto {
 
   @IsInt()
   capacity: number;
-
-  @IsEnum(TableStatus)
-  status: TableStatus;
 }

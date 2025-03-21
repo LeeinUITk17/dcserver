@@ -69,41 +69,32 @@ export class UserService {
       },
     });
   }
-  async updateUserTier(userId: string) {
+  async updateUserTier(userId: string, earnedPoint: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-    if (user.point < 1000) {
-      throw new ForbiddenException(
-        'User does not have enough points to upgrade tier',
-      );
-    }
 
+    // 1️⃣ Cập nhật tổng điểm
+    const totalPoint = Math.max(0, user.point + earnedPoint); // Đảm bảo điểm không âm
+
+    // 2️⃣ Xác định cấp bậc mới
     let newTier: UserTier | null = null;
-
-    switch (true) {
-      case user.point >= 1000 && user.point < 5000:
-        newTier = UserTier.SILVER;
-        break;
-      case user.point >= 5000 && user.point < 10000:
-        newTier = UserTier.GOLD;
-        break;
+    if (totalPoint >= 1000 && totalPoint < 5000) {
+      newTier = UserTier.SILVER;
+    } else if (totalPoint >= 5000) {
+      newTier = UserTier.GOLD;
     }
 
-    if (newTier) {
-      return await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          userTier: newTier,
-          updatedAt: new Date(),
-        },
-      });
-    }
-
+    // 3️⃣ Cập nhật điểm & cấp bậc (nếu có)
     return await this.prisma.user.update({
       where: { id: userId },
-      data: { updatedAt: new Date() },
+      data: {
+        point: totalPoint,
+        userTier: newTier ?? user.userTier, // Giữ nguyên nếu không đổi
+        updatedAt: new Date(),
+      },
     });
   }
 }

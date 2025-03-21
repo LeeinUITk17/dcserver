@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsDecimal, IsEnum } from 'class-validator';
+import { IsString, IsDateString, IsEnum } from 'class-validator';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 
 export class CreatePaymentDto {
@@ -7,9 +7,6 @@ export class CreatePaymentDto {
 
   @IsDateString()
   paymentDate: string;
-
-  @IsDecimal()
-  amount: number;
 
   @IsEnum(PaymentMethod)
   method: PaymentMethod;
