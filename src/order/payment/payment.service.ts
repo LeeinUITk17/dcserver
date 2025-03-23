@@ -17,6 +17,7 @@ import {
   OrderStatus,
   OrderType,
   PaymentStatus,
+  ReservationStatus,
 } from '@prisma/client';
 @Injectable()
 export class PaymentService {
@@ -30,7 +31,7 @@ export class PaymentService {
     // 1️⃣ Kiểm tra đơn hàng có tồn tại không
     const order = await this.prisma.order.findUnique({
       where: { id: createPaymentDto.orderId },
-      include: { coupon: true }, // Lấy thông tin coupon nếu có
+      include: { coupon: true },
     });
 
     if (!order) {
@@ -97,11 +98,32 @@ export class PaymentService {
       where: { id: order.id },
       data: { status: newOrderStatus },
     });
+    if (order.tableId) {
+      await this.prisma.table.update({
+        where: { id: order.tableId },
+        data: { status: 'AVAILABLE' },
+      });
+    }
+    if (order.reservationId) {
+      await this.prisma.reservation.update({
+        where: { id: order.reservationId },
+        data: { status: ReservationStatus.COMPLETED },
+      });
+    }
+    const delivery = await this.prisma.delivery.findFirst({
+      where: { orderId: order.id },
+    });
+    if (delivery) {
+      await this.prisma.delivery.update({
+        where: { id: delivery.id },
+        data: { status: 'DELIVERED' },
+      });
+    }
 
     return payment;
   }
 
-  // ✅ Hàm hỗ trợ xử lý coupon (giúp code chính gọn hơn)
+  // ✅ Hàm hỗ trợ xử lý coupon
   private async handleCouponUsage(couponId: string, userId: string) {
     try {
       const createCouponUsageDto = plainToInstance(CreateCouponUsageDto, {

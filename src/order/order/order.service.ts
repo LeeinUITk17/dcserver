@@ -8,6 +8,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 // import { UpdateOrderDto } from './dto/update-order.dto';
 // import { UserService } from 'src/user/user.service';
 import { CouponUsageService } from 'src/coupon/coupon-usage/coupon-usage.service';
+import { ReservationService } from '../reservation/reservation.service';
+import { CouponService } from 'src/coupon/coupon/coupon.service';
 import {
   OrderStatus,
   OrderType,
@@ -23,20 +25,36 @@ export class OrderService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly couponUsageService: CouponUsageService,
+    private readonly reservationService: ReservationService,
+    private readonly couponService: CouponService,
   ) {}
-  async createOrder(data: CreateOrderDto) {
+  async createOrder(data: CreateOrderDto, userId: string) {
     return this.prisma.$transaction(async (prisma) => {
-      const { userId, tableId, orderType, shippingFee, couponId, orderItems } =
-        data;
+      const {
+        tableId,
+        orderType,
+        shippingFee,
+        couponId,
+        orderItems,
+        reservationId,
+      } = data;
 
+      if (couponId) {
+        const coupon = await this.couponService.checkCoupon(couponId);
+        if (!coupon) {
+          throw new NotFoundException(
+            `Coupon with ID ${couponId} not found or is not allocated`,
+          );
+        }
+      }
       // Tính tổng tiền đơn hàng
-      const totalAmount = orderItems.reduce(
+      let totalAmount = orderItems.reduce(
         (sum: number, item) => sum + Number(item.price) * item.quantity,
         0,
       );
       const taxAmount = parseFloat((totalAmount * 0.1).toFixed(2)); // Làm tròn 2 chữ số thập phân
       const earnedPoint = parseFloat((totalAmount * 0.01).toFixed(2));
-
+      totalAmount += taxAmount;
       // 1️⃣ Tạo đơn hàng
       const order = await prisma.order.create({
         data: {
@@ -47,6 +65,7 @@ export class OrderService {
           shippingFee,
           taxAmount,
           couponId,
+          reservationId,
           earnedPoint,
           status: OrderStatus.PROCESSING,
           orderItems: {
@@ -61,7 +80,16 @@ export class OrderService {
           orderItems: true,
         },
       });
-
+      if (reservationId) {
+        try {
+          await this.reservationService.confirmReservation(
+            reservationId,
+            order.id,
+          );
+        } catch (e) {
+          console.log(e, 'Cannot confirm reservation');
+        }
+      }
       // 2️⃣ Nếu là đơn "DINE_IN", cập nhật trạng thái bàn
       if (orderType === OrderType.DINE_IN && tableId) {
         await prisma.table.update({

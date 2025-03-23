@@ -36,6 +36,7 @@ import { ShiftModule } from './employee/shift/shift.module';
 import { PayrollMiddleware } from './middleware/payroll.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronJobService } from './node-cron/cron-job.service';
+import { CouponExpirationMiddleware } from './middleware/campaign.middleware';
 @Module({
   imports: [
     PrismaModule,
@@ -86,5 +87,6 @@ import { CronJobService } from './node-cron/cron-job.service';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(PayrollMiddleware).forRoutes('*'); // Middleware chạy cho tất cả routes
+    consumer.apply(CouponExpirationMiddleware).forRoutes('*'); // Middleware chạy cho routes bắt đầu bằng 'coupon/campaign'
   }
 }

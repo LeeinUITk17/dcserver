@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -19,8 +20,8 @@ export class ReservationController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+  create(@Body() createReservationDto: CreateReservationDto, @Req() req) {
+    return this.reservationService.create(createReservationDto, req.user.id);
   }
 
   @Get()

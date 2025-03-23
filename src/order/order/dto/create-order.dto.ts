@@ -33,6 +33,7 @@ export class CreateOrderDto {
   orderType: OrderType;
 
   @IsDecimal()
+  @IsOptional()
   shippingFee?: number;
 
   @IsOptional()
@@ -41,6 +42,9 @@ export class CreateOrderDto {
 
   // @IsInt()
   // earnedPoint: number;
+  @IsOptional()
+  @IsString()
+  reservationId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

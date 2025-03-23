@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Prisma } from '@prisma/client';
+import { CouponStatus } from '@prisma/client';
 @Injectable()
 export class CouponService {
   constructor(private readonly prisma: PrismaService) {}
@@ -10,6 +11,15 @@ export class CouponService {
   async create(createCouponDto: CreateCouponDto) {
     return this.prisma.coupon.create({
       data: createCouponDto,
+    });
+  }
+  async checkCoupon(couponId: string) {
+    return await this.prisma.coupon.findFirst({
+      where: {
+        id: couponId,
+        status: CouponStatus.ALLOCATED,
+        isDeleted: false,
+      },
     });
   }
 
