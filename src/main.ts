@@ -16,8 +16,8 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(passport.initialize());
   // Lắng nghe trên cổng 3000
-  const port = 3000;
-  await app.listen(port);
+  const port = 8000;
+  await app.listen(port, '0.0.0.0');
   Logger.log(`Server is running on http://localhost:${port}`);
 }
 

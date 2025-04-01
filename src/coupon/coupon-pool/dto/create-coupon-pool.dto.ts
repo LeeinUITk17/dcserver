@@ -9,7 +9,7 @@ export class CreateCouponPoolDto {
   description?: string;
 
   @IsString()
-  totalCoupons: string;
+  totalCoupons: number;
 
   @IsOptional()
   @IsString()

@@ -392,7 +392,7 @@ model CouponPool {
   id           String       @id @default(uuid())
   name         String
   description  String?
-  totalCoupons String
+  totalCoupons Int
   createdAt    DateTime  @default(now())
   campaignId   String?
   campaign     Campaign? @relation(fields: [campaignId], references: [id])
