@@ -6,7 +6,7 @@ export class CreateWorkScheduleDto {
 
   @IsOptional()
   @IsString()
-  shiftTemplateId?: string;
+  shiftTemplateId: string;
 
   @IsDateString()
   shiftStart: string;

@@ -8,7 +8,7 @@ import { UserTier } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-  async getAllUsers() {
+  async getAllCustomers() {
     return await this.prisma.user.findMany({
       select: {
         id: true,
@@ -16,7 +16,7 @@ export class UserService {
         email: true,
         phone: true,
         address: true,
-        isAdmin: true,
+        point: true,
         createdAt: true,
         updatedAt: true,
         userTier: true,

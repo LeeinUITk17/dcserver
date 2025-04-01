@@ -53,8 +53,8 @@ model WorkSchedule {
   id         String   @id @default(uuid())
   employee   Employee @relation("EmployeeWorkSchedules", fields: [employeeId], references: [id])
   employeeId String
-  shiftTemplateId String?  // Liên kết với ca mẫu
-  shiftTemplate   ShiftTemplate? @relation("ShiftTemplateWorkSchedules", fields: [shiftTemplateId], references: [id])
+  shiftTemplateId String  // Liên kết với ca mẫu
+  shiftTemplate   ShiftTemplate @relation("ShiftTemplateWorkSchedules", fields: [shiftTemplateId], references: [id])
   shiftStart DateTime
   shiftEnd   DateTime
   createdAt  DateTime @default(now())

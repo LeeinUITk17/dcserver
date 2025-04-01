@@ -17,7 +17,7 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard('jwt'), StaffGuard)
   async getAllUsers() {
-    return this.userService.getAllUsers();
+    return this.userService.getAllCustomers();
   }
 
   @Get(':id')

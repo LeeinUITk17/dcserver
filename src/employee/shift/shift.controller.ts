@@ -13,6 +13,7 @@ import { CreateShiftDto } from './dto/create-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from './../../auth/admin.gaurd';
+import { StaffGuard } from './../../auth/staff.gaurd';
 @Controller('shift')
 export class ShiftController {
   constructor(private readonly shiftService: ShiftService) {}
@@ -28,11 +29,13 @@ export class ShiftController {
     return this.shiftService.bulkCreate(shiftTemplates);
   }
   @Get()
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
   findAll() {
     return this.shiftService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
   findOne(@Param('id') id: string) {
     return this.shiftService.findOne(id);
   }
@@ -47,6 +50,7 @@ export class ShiftController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.shiftService.remove(id);
   }

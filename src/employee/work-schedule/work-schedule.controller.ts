@@ -6,12 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { WorkScheduleService } from './work-schedule.service';
 import { CreateWorkScheduleDto } from './dto/create-work-schedule.dto';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule.dto';
-
+import { AuthGuard } from '@nestjs/passport';
+import { StaffGuard } from './../../auth/staff.gaurd';
 @Controller('work-schedule')
+@UseGuards(AuthGuard('jwt'), StaffGuard)
 export class WorkScheduleController {
   constructor(private readonly workScheduleService: WorkScheduleService) {}
 
