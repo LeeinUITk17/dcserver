@@ -6,6 +6,10 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class PayrollService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getAlLPayrolls() {
+    return this.prisma.payroll.findMany();
+  }
+
   async calculatePayroll(employeeId: string, month: number, year: number) {
     // Kiểm tra employee tồn tại
     const employee = await this.prisma.employee.findUnique({

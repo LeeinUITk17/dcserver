@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOvertimeRequestDto } from './dto/create-overtime-request.dto';
 import { UpdateOvertimeRequestDto } from './dto/update-overtime-request.dto';
-
+import { OvertimeStatus } from '@prisma/client';
 @Injectable()
 export class OvertimeRequestService {
   constructor(private readonly prisma: PrismaService) {}
@@ -50,6 +50,22 @@ export class OvertimeRequestService {
     return this.prisma.overtimeRequest.update({
       where: { id },
       data: { isDeleted: true },
+    });
+  }
+  async resolveRequest(id: string, status: OvertimeStatus) {
+    // Find the overtime request by ID
+    const overtimeRequest = await this.prisma.overtimeRequest.findUnique({
+      where: { id },
+    });
+
+    if (!overtimeRequest) {
+      throw new NotFoundException(`Overtime request with ID ${id} not found`);
+    }
+
+    // Update the status of the overtime request
+    return this.prisma.overtimeRequest.update({
+      where: { id },
+      data: { status },
     });
   }
 }

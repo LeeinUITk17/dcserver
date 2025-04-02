@@ -14,7 +14,7 @@ import { UpdateSupplierItemDto } from './dto/update-supplier-item.dto';
 import { BulkCreateSuppliersDto } from './dto/bulk-create-suppliers.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { StaffGuard } from './../../auth/staff.gaurd';
-@Controller('supplier-item')
+@Controller('supplier')
 @UseGuards(AuthGuard('jwt'), StaffGuard)
 export class SupplierItemController {
   constructor(private readonly supplierItemService: SupplierItemService) {}

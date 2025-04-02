@@ -52,4 +52,15 @@ export class AttendanceService {
       data: { isDeleted: true },
     });
   }
+  async bulkCreateAttendanceRecords(
+    employeeId: string,
+    attendanceRecords: CreateAttendanceDto[],
+  ) {
+    return this.prisma.attendance.createMany({
+      data: attendanceRecords.map((record) => ({
+        ...record,
+        employeeId,
+      })),
+    });
+  }
 }
