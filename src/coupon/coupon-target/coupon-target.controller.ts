@@ -41,4 +41,9 @@ export class CouponTargetController {
   remove(@Param('id') id: string) {
     return this.couponTargetService.remove(id);
   }
+  @Get('PinkCoupon/:id')
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
+  findPinkCouponById(@Param('id') id: string) {
+    return this.couponTargetService.findALLCouponTargetByUserId(id);
+  }
 }

@@ -37,4 +37,9 @@ export class UserController {
     const requestUser = request.user;
     return this.userService.updateUserInfo(userId, updateData, requestUser);
   }
+  @Get('pinkId/:phone')
+  @UseGuards(AuthGuard('jwt'), StaffGuard)
+  async getUserIdByPhoneNumber(@Param('phone') phone: string) {
+    return this.userService.getUserIdByPhoneNumber(phone);
+  }
 }

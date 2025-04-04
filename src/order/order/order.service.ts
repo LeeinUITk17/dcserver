@@ -62,7 +62,7 @@ export class OrderService {
           tableId,
           orderType,
           totalAmount,
-          shippingFee,
+          shippingFee: shippingFee ?? 0,
           taxAmount,
           couponId,
           reservationId,

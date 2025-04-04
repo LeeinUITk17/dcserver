@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCouponTargetDto } from './dto/create-coupon-target.dto';
 import { UpdateCouponTargetDto } from './dto/update-coupon-target.dto';
-
+import { CouponStatus } from '@prisma/client';
 @Injectable()
 export class CouponTargetService {
   static findbyCoupnIdUserIds: any;
@@ -63,5 +63,18 @@ export class CouponTargetService {
       );
     }
     return couponTarget.id;
+  }
+  async findALLCouponTargetByUserId(userId: string) {
+    const couponTarget = await this.prisma.couponTarget.findMany({
+      where: {
+        userId,
+        isDeleted: false,
+        coupon: { status: CouponStatus.ALLOCATED },
+      },
+      include: {
+        coupon: true,
+      },
+    });
+    return couponTarget;
   }
 }

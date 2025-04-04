@@ -5,9 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserTier } from '@prisma/client';
+import { CouponTargetService } from '../coupon/coupon-target/coupon-target.service';
+
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly coupontarget: CouponTargetService,
+  ) {}
   async getAllCustomers() {
     return await this.prisma.user.findMany({
       select: {
@@ -96,5 +101,12 @@ export class UserService {
         updatedAt: new Date(),
       },
     });
+  }
+  async getUserIdByPhoneNumber(phoneNumber: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { phone: phoneNumber },
+      select: { id: true },
+    });
+    return user.id;
   }
 }
