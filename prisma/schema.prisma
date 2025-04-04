@@ -349,7 +349,7 @@ model Setting {
 model Delivery {
   id           String      @id @default(uuid())
   orderId      String      @unique
-  deliveryDate DateTime?
+  deliveryDate DateTime    @default(now())
   status       DeliveryStatus @default(PENDING)
   carrier      String
   trackingCode String?

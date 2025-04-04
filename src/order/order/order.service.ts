@@ -18,6 +18,7 @@ import {
   // PaymentStatus,
 } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+import { UserService } from 'src/user/user.service';
 // import { CreateCouponUsageDto } from 'src/coupon/coupon-usage/dto/create-coupon-usage.dto';
 // import { plainToInstance } from 'class-transformer';
 @Injectable()
@@ -27,8 +28,9 @@ export class OrderService {
     private readonly couponUsageService: CouponUsageService,
     private readonly reservationService: ReservationService,
     private readonly couponService: CouponService,
+    private readonly userService: UserService,
   ) {}
-  async createOrder(data: CreateOrderDto, userId: string) {
+  async createOrder(data: CreateOrderDto, phone: string) {
     return this.prisma.$transaction(async (prisma) => {
       const {
         tableId,
@@ -47,6 +49,13 @@ export class OrderService {
           );
         }
       }
+      if (phone) {
+        const iduser = await this.userService.getUserIdByPhoneNumber(phone);
+        if (!iduser) {
+          throw new NotFoundException(`User with phone ${phone} not found`);
+        }
+        data.userId = iduser;
+      }
       // Tính tổng tiền đơn hàng
       let totalAmount = orderItems.reduce(
         (sum: number, item) => sum + Number(item.price) * item.quantity,
@@ -58,7 +67,7 @@ export class OrderService {
       // 1️⃣ Tạo đơn hàng
       const order = await prisma.order.create({
         data: {
-          userId,
+          userId: data.userId,
           tableId,
           orderType,
           totalAmount,

@@ -6,7 +6,7 @@ import {
   Param,
   Delete,
   UseGuards,
-  Req,
+  // Req,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,10 +18,13 @@ import { StaffGuard } from './../../auth/staff.gaurd';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Post()
+  @Post('/:phone')
   @UseGuards(AuthGuard('jwt'))
-  async create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
-    return this.orderService.createOrder(createOrderDto, req.user.id);
+  async create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Param('phone') phone: string,
+  ) {
+    return this.orderService.createOrder(createOrderDto, phone);
   }
 
   @Get()
