@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { WorkScheduleService } from './work-schedule.service';
 import { CreateWorkScheduleDto } from './dto/create-work-schedule.dto';
@@ -19,8 +20,8 @@ export class WorkScheduleController {
   constructor(private readonly workScheduleService: WorkScheduleService) {}
 
   @Post()
-  create(@Body() createWorkScheduleDto: CreateWorkScheduleDto) {
-    return this.workScheduleService.create(createWorkScheduleDto);
+  create(@Body() createWorkScheduleDto: CreateWorkScheduleDto, @Req() req) {
+    return this.workScheduleService.create(createWorkScheduleDto, req.user.id);
   }
 
   @Get()

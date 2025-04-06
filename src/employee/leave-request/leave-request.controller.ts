@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { LeaveRequestService } from './leave-request.service';
 import { CreateLeaveRequestDto } from './dto/create-leave-request.dto';
@@ -21,8 +22,8 @@ export class LeaveRequestController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'), StaffGuard)
-  create(@Body() createLeaveRequestDto: CreateLeaveRequestDto) {
-    return this.leaveRequestService.create(createLeaveRequestDto);
+  create(@Body() createLeaveRequestDto: CreateLeaveRequestDto, @Req() req) {
+    return this.leaveRequestService.create(createLeaveRequestDto, req.user.id);
   }
 
   @Get()

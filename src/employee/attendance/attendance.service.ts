@@ -7,10 +7,18 @@ import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createAttendanceDto: CreateAttendanceDto) {
-    return this.prisma.attendance.create({
-      data: createAttendanceDto,
+  async create(createAttendanceDto: CreateAttendanceDto, userId: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId: userId },
     });
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${userId} not found`);
+    }
+    const data = {
+      ...createAttendanceDto,
+      employeeId: employee.id,
+    };
+    return this.prisma.attendance.create({ data });
   }
 
   async findAll() {

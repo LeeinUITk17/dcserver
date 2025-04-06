@@ -7,10 +7,21 @@ import { LeaveStatus } from '@prisma/client';
 export class LeaveRequestService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createLeaveRequestDto: CreateLeaveRequestDto) {
-    return this.prisma.leaveRequest.create({
-      data: createLeaveRequestDto,
+  async create(createLeaveRequestDto: CreateLeaveRequestDto, userId: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId: userId },
     });
+
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${userId} not found`);
+    }
+
+    const data = {
+      ...createLeaveRequestDto,
+      employeeId: employee.id,
+    };
+
+    return this.prisma.leaveRequest.create({ data });
   }
 
   async findAll() {

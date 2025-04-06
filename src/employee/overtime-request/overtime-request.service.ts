@@ -7,10 +7,21 @@ import { OvertimeStatus } from '@prisma/client';
 export class OvertimeRequestService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createOvertimeRequestDto: CreateOvertimeRequestDto) {
-    return this.prisma.overtimeRequest.create({
-      data: createOvertimeRequestDto,
+  async create(
+    createOvertimeRequestDto: CreateOvertimeRequestDto,
+    userId: string,
+  ) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId: userId },
     });
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${userId} not found`);
+    }
+    const data = {
+      ...createOvertimeRequestDto,
+      employeeId: employee.id,
+    };
+    return this.prisma.overtimeRequest.create({ data });
   }
 
   async findAll() {

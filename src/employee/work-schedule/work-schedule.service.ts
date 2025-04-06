@@ -7,10 +7,18 @@ import { UpdateWorkScheduleDto } from './dto/update-work-schedule.dto';
 export class WorkScheduleService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createWorkScheduleDto: CreateWorkScheduleDto) {
-    return this.prisma.workSchedule.create({
-      data: createWorkScheduleDto,
+  async create(createWorkScheduleDto: CreateWorkScheduleDto, userId: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { userId: userId },
     });
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${userId} not found`);
+    }
+    const data = {
+      ...createWorkScheduleDto,
+      employeeId: employee.id,
+    };
+    return this.prisma.workSchedule.create({ data });
   }
 
   async findAll() {

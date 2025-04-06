@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { OvertimeRequestService } from './overtime-request.service';
 import { CreateOvertimeRequestDto } from './dto/create-overtime-request.dto';
@@ -23,8 +24,14 @@ export class OvertimeRequestController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'), StaffGuard)
-  create(@Body() createOvertimeRequestDto: CreateOvertimeRequestDto) {
-    return this.overtimeRequestService.create(createOvertimeRequestDto);
+  create(
+    @Body() createOvertimeRequestDto: CreateOvertimeRequestDto,
+    @Req() req,
+  ) {
+    return this.overtimeRequestService.create(
+      createOvertimeRequestDto,
+      req.user.id,
+    );
   }
 
   @Get()
