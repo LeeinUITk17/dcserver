@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMenuitemDto } from './dto/create-menuitem.dto';
 import { UpdateMenuitemDto } from './dto/update-menuitem.dto';
-
 @Injectable()
 export class MenuitemService {
   constructor(private readonly prisma: PrismaService) {}
@@ -26,6 +29,42 @@ export class MenuitemService {
 
       return menuItem;
     });
+  }
+  async bulkCreate(createMenuItemDtos: CreateMenuitemDto[]) {
+    const createdMenuItems = await this.prisma.$transaction(async (prisma) => {
+      const results = [];
+
+      for (const menuItemDto of createMenuItemDtos) {
+        const { recipeIngredients, ...menuItemData } = menuItemDto;
+
+        const menuItem = await prisma.menuItem.create({
+          data: menuItemData,
+        });
+
+        if (!menuItem || !menuItem.id) {
+          throw new InternalServerErrorException(
+            `Failed to create menu item: ${menuItemData.name}`,
+          );
+        }
+
+        if (recipeIngredients && recipeIngredients.length > 0) {
+          await prisma.recipeIngredient.createMany({
+            data: recipeIngredients.map((ingredient) => ({
+              menuItemId: menuItem.id,
+              inventoryItemId: ingredient.inventoryItemId,
+              quantity: ingredient.quantity,
+              unit: ingredient.unit,
+            })),
+          });
+        }
+
+        results.push(menuItem);
+      }
+
+      return results;
+    });
+
+    return createdMenuItems;
   }
 
   async findAll() {

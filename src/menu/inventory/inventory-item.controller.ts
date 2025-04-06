@@ -22,6 +22,10 @@ export class InventoryItemController {
   create(@Body() createInventoryItemDto: CreateInventoryItemDto) {
     return this.inventoryItemService.create(createInventoryItemDto);
   }
+  @Post('bulk')
+  async bulkCreate(@Body() dto: { items: CreateInventoryItemDto[] }) {
+    return this.inventoryItemService.bulkCreate(dto.items);
+  }
 
   @Get()
   findAll() {

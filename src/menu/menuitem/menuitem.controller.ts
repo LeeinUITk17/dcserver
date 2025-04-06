@@ -13,6 +13,8 @@ import { CreateMenuitemDto } from './dto/create-menuitem.dto';
 import { UpdateMenuitemDto } from './dto/update-menuitem.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { StaffGuard } from './../../auth/staff.gaurd';
+import { BulkCreateMenuItemsDto } from './dto/bulk-create-menu-item.dto';
+import { MenuItem } from '@prisma/client';
 @Controller('menu-items')
 @UseGuards(AuthGuard('jwt'), StaffGuard)
 export class MenuitemController {
@@ -21,6 +23,12 @@ export class MenuitemController {
   @Post()
   async create(@Body() createMenuItemDto: CreateMenuitemDto) {
     return this.menuitemService.create(createMenuItemDto);
+  }
+  @Post('bulk')
+  async bulkCreate(
+    @Body() bulkCreateDto: BulkCreateMenuItemsDto,
+  ): Promise<MenuItem[]> {
+    return this.menuitemService.bulkCreate(bulkCreateDto.items);
   }
 
   @Get()

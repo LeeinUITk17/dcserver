@@ -4,7 +4,7 @@ import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 import { TransactionService } from '../inventory-transaction/transaction.service';
 import { CreateTransactionDto } from '../inventory-transaction/dto/create-transaction.dto';
-
+import { TransactionType } from '@prisma/client';
 @Injectable()
 export class InventoryItemService {
   constructor(
@@ -37,6 +37,44 @@ export class InventoryItemService {
 
     await this.transactionService.create(createTransactionDto);
     return inventoryItem;
+  }
+  async bulkCreate(createInventoryItemDtos: CreateInventoryItemDto[]) {
+    const createdInventoryItems = await this.prisma.$transaction(
+      async (prisma) => {
+        const itemsCreatedInTx = [];
+
+        for (const item of createInventoryItemDtos) {
+          const inventoryItem = await prisma.inventoryItem.create({
+            data: {
+              name: item.name,
+              quantity: item.quantity,
+              unit: item.unit,
+              supplierId: item.supplierId,
+              category: item.category,
+            },
+          });
+
+          if (!inventoryItem || !inventoryItem.id) {
+            throw new Error(`Failed to create inventory item: ${item.name}`);
+          }
+
+          await prisma.inventoryTransaction.create({
+            data: {
+              inventoryItemId: inventoryItem.id,
+              quantity: inventoryItem.quantity,
+              transactionType: item.transactionType as TransactionType,
+              price: item.price,
+              timestamp: new Date(),
+            },
+          });
+
+          itemsCreatedInTx.push(inventoryItem);
+        }
+        return itemsCreatedInTx;
+      },
+    );
+
+    return createdInventoryItems;
   }
 
   async findAll() {
